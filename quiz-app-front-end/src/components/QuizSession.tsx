@@ -20,8 +20,8 @@ const QuizSession = () => {
 
   useEffect(() => {
     const handleInterruption = () => {
-      alert("Quiz session interrupted. Your quiz has ended.");
-      navigate("/");
+      // alert("Quiz session interrupted. Your quiz has ended.");
+      // navigate("/");
     };
 
     window.addEventListener("beforeunload", handleInterruption);
