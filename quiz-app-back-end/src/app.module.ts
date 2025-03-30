@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { QuizModule } from './quiz/quiz.module';
 import * as dotenv from 'dotenv';
 import { MongooseModule } from '@nestjs/mongoose';
+import { UserModule } from './user/user.module';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ dotenv.config();
   imports: [
     QuizModule,
     MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://localhost:27017/defaultdb'),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
