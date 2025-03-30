@@ -15,31 +15,31 @@ const Quiz = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-    //   useEffect(() => {
-    //     axios
-    //       .get<Quiz[]>("https://your-api-endpoint.com/quizzes") // Replace with actual backend API
-    //       .then((response) => {
-    //         setQuizzes(response.data);
-    //         setLoading(false);
-    //       })
-    //       .catch((error) => {
-    //         setError("Failed to load quizzes.");
-    //         setLoading(false);
-    //       });
-    //   }, []);
-    useEffect(() => {
-        // Temporary dummy data until backend is implemented
-        const dummyQuizzes: Quiz[] = [
-            { id: "1", name: "JavaScript Basics", time: "10", difficulty: "Easy" },
-            { id: "2", name: "React Fundamentals", time: "15", difficulty: "Medium" },
-            { id: "3", name: "Node.js Mastery", time: "20", difficulty: "Hard" },
-        ];
-
-        setTimeout(() => {
-            setQuizzes(dummyQuizzes);
+      useEffect(() => {
+        axios
+          .get<Quiz[]>("http://localhost:3000/quiz") 
+          .then((response) => {
+            setQuizzes(response.data);
             setLoading(false);
-        }, 1000); // Simulate API delay
-    }, []);
+          })
+          .catch((error) => {
+            setError("Failed to load quizzes.");
+            setLoading(false);
+          });
+      }, []);
+    // useEffect(() => {
+    //     // Temporary dummy data until backend is implemented
+    //     const dummyQuizzes: Quiz[] = [
+    //         { id: "1", name: "JavaScript Basics", time: "10", difficulty: "Easy" },
+    //         { id: "2", name: "React Fundamentals", time: "15", difficulty: "Medium" },
+    //         { id: "3", name: "Node.js Mastery", time: "20", difficulty: "Hard" },
+    //     ];
+
+    //     setTimeout(() => {
+    //         setQuizzes(dummyQuizzes);
+    //         setLoading(false);
+    //     }, 1000); // Simulate API delay
+    // }, []);
 
     if (loading) {
         return <div className="text-center text-lg mt-10">Loading...</div>;

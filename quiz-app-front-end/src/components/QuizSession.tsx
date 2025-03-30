@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaTimesCircle } from "react-icons/fa";
+import axios from "axios";
 
 interface Question {
   id: string;
@@ -30,31 +31,42 @@ const QuizSession = () => {
     });
 
     // Mock data for testing before API implementation
-    const mockQuestions: Question[] = [
-      {
-        id: "1",
-        question: "What is the capital of France?",
-        options: ["Paris", "London", "Berlin", "Madrid"],
-        correctAnswer: "Paris",
-      },
-      {
-        id: "2",
-        question: "Which language runs in a web browser?",
-        options: ["Java", "C++", "Python", "JavaScript"],
-        correctAnswer: "JavaScript",
-      },
-      {
-        id: "3",
-        question: "What does CSS stand for?",
-        options: ["Central Style Sheets", "Cascading Style Sheets", "Coded Style System", "Creative Styling Syntax"],
-        correctAnswer: "Cascading Style Sheets",
-      },
-    ];
+    // const mockQuestions: Question[] = [
+    //   {
+    //     id: "1",
+    //     question: "What is the capital of France?",
+    //     options: ["Paris", "London", "Berlin", "Madrid"],
+    //     correctAnswer: "Paris",
+    //   },
+    //   {
+    //     id: "2",
+    //     question: "Which language runs in a web browser?",
+    //     options: ["Java", "C++", "Python", "JavaScript"],
+    //     correctAnswer: "JavaScript",
+    //   },
+    //   {
+    //     id: "3",
+    //     question: "What does CSS stand for?",
+    //     options: ["Central Style Sheets", "Cascading Style Sheets", "Coded Style System", "Creative Styling Syntax"],
+    //     correctAnswer: "Cascading Style Sheets",
+    //   },
+    // ];
+    axios
+          .get<Question[]>(`http://localhost:3000/quiz/${quizId}`) 
+          .then((response) => {
+            console.log("Quiz data:", response.data);
+            setQuestions(response.data);
+            setLoading(false);
+          })
+          .catch((error) => {
+            setError("Failed to load quizzes.");
+            setLoading(false);
+          });
     
-    setTimeout(() => {
-      setQuestions(mockQuestions);
-      setLoading(false);
-    }, 1000); // Simulate API delay
+    // setTimeout(() => {
+    //   setQuestions(mockQuestions);
+    //   setLoading(false);
+    // }, 1000); // Simulate API delay
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
