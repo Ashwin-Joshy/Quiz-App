@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import QuizDialog from "../utils/QuizDialog";
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,6 +14,7 @@ const Login = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setIsLoggedIn } = useContext(AuthContext)!;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +23,10 @@ const Login = () => {
       const payload = isSignUp ? { email, password, name, phone, image } : { email, password };
       const response = await axios.post(url, payload);
       console.log(isSignUp ? "Signup Success:" : "Login Success:", response.data);
+      if(!isSignUp) {
+        localStorage.setItem("token", response.data.access_token);
+        setIsLoggedIn(true);
+      }
       setIsModalOpen(true);
     } catch (err) {
       setError(isSignUp ? "Signup failed. Please check your details." : "Login failed. Please check your credentials.");

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { QuizService } from './quiz.service';
-import { CreateQuizDto } from './dto/quiz.dto';
+import { CreateQuizDto, SubmitQuizDto } from './dto/quiz.dto';
 
 @Controller('quiz')
 export class QuizController {
@@ -24,5 +24,10 @@ export class QuizController {
     @Post('create-new-quiz')
     async createNewQuiz(@Body() createQuizDto: CreateQuizDto) {
         return this.quizService.createNewQuiz(createQuizDto);
+    }
+
+    @Post('submit-quiz')
+    async submitQuiz(@Body() data:SubmitQuizDto) {
+        return this.quizService.submitQuiz(data);
     }
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FaTimesCircle } from "react-icons/fa";
-import axios from "axios";
+import api from "../utils/axiosInstance";
 
 interface Question {
   id: string;
@@ -53,7 +53,7 @@ const QuizSession = () => {
     //     correctAnswer: "Cascading Style Sheets",
     //   },
     // ];
-    axios
+    api
           .get<Question[]>(`http://localhost:3000/quiz/questions-by-quiz/${quizId}`) 
           .then((response) => {
             console.log("Quiz data:", response.data);

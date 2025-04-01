@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateQuizDto } from './dto/quiz.dto';
+import { CreateQuizDto, SubmitQuizDto } from './dto/quiz.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Question } from './schemas/question.schema';
 import { Model } from 'mongoose';
 import { Quiz } from './schemas/quiz.schema';
+import { Answer } from './schemas/answer.schema';
 
 @Injectable()
 export class QuizService {
@@ -76,7 +77,8 @@ export class QuizService {
     }
     constructor(
         @InjectModel(Question.name) private questionModel: Model<Question>,
-        @InjectModel(Quiz.name) private quizModel: Model<Quiz>
+        @InjectModel(Quiz.name) private quizModel: Model<Quiz>,
+        @InjectModel(Answer.name) private answerModel: Model<Answer>
     ) { }
 
     async getAllQuiz() {
@@ -85,11 +87,11 @@ export class QuizService {
     }
 
     async getQuestionsByQuizId(id: string) {
-        const quiz= await this.quizModel.findById(id)
+        const quiz = await this.quizModel.findById(id)
         if (!quiz) {
             throw new NotFoundException(`Quiz with ID ${id} not found`);
         }
-        const questions = await this.questionModel.find({ _id: { $in: quiz.questions } }).exec();
+        const questions = await this.questionModel.find({ _id: { $in: quiz.questions } }).select('-answer -explanation').exec();
         if (!questions) {
             throw new NotFoundException(`Questions for Quiz ID ${id} not found`);
         }
@@ -107,14 +109,16 @@ export class QuizService {
     async createNewQuiz(createQuizDto: CreateQuizDto): Promise<Quiz> {
         const { name, time, difficulty, isPrivate, questions } = createQuizDto;
         console.log("Inpiut", createQuizDto);
-        
+
 
         // Create and save all questions in parallel
         const questionDocs = await Promise.all(
             questions.map(async (question) => {
                 const newQuestion = new this.questionModel({
                     question: question.question,
-                    options: question.options
+                    options: question.options,
+                    answer: question.answer,
+                    ...(question.explanation && { explanation: question.explanation })
                 });
                 return newQuestion.save(); // Return the saved document
             })
@@ -134,6 +138,16 @@ export class QuizService {
         });
 
         return newQuiz.save();
+    }
+    async submitQuiz(quizData: SubmitQuizDto) {
+        const { quizId, data }: (any) = quizData;
+        // const quiz = await this.quizModel.findById(quizId).exec();
+        // if (!quiz) {
+        //     throw new NotFoundException(`Quiz with ID ${quizId} not found`);
+        // }
+        const correctAnswer = await this.questionModel.find({ _id: { $in: data.questionId } }).exec();
+        //const userResult = 
+
     }
 
 }

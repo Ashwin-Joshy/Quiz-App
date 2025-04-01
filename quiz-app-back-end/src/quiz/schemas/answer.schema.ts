@@ -5,7 +5,7 @@ export type AnswerDocument = Answer & Document;
 
 @Schema()
 export class Answer {
-  @Prop({ type: Types.ObjectId, ref: 'Question', required: true })
+  @Prop({ required: true })
   questionId: string;
 
   @Prop({ required: true })

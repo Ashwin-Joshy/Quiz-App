@@ -10,6 +10,13 @@ class QuestionDto {
   @IsArray()
   @IsNotEmpty()
   options: string[];
+
+  @IsString()
+  @IsNotEmpty()
+  answer: string;
+
+  @IsString()
+  explanation?: string;
 }
 
 export class CreateQuizDto {
@@ -33,4 +40,25 @@ export class CreateQuizDto {
   @ValidateNested({ each: true })
   @Type(() => QuestionDto)
   questions: QuestionDto[];
+}
+
+export class SubmittedDataDto {
+  @IsString()
+  @IsNotEmpty()
+  questionId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  answer: string;
+}
+
+export class SubmitQuizDto{
+  @IsString()
+  @IsNotEmpty()
+  quizId: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SubmittedDataDto)
+  data: SubmittedDataDto[];
 }

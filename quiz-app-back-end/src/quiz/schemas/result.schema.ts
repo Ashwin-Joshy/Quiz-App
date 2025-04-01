@@ -17,6 +17,12 @@ export class Result {
 
   @Prop({ required: true })
   userAnswer: string;
+
+  @Prop({ required: true })
+  isCorrect: boolean;
+
+  @Prop({ required: true })
+  attenmptedAt: Date;
 }
 
 export const ResultSchema = SchemaFactory.createForClass(Result);
