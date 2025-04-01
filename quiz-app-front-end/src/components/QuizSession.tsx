@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FaTimesCircle } from "react-icons/fa";
 import axios from "axios";
 
@@ -13,6 +13,8 @@ interface Question {
 const QuizSession = () => {
   const { quizId } = useParams<{ quizId: string }>();
   const navigate = useNavigate();
+  const location = useLocation(); 
+  const questionsIds = location.state?.questions || [];
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ const QuizSession = () => {
     //   },
     // ];
     axios
-          .get<Question[]>(`http://localhost:3000/quiz/${quizId}`) 
+          .get<Question[]>(`http://localhost:3000/quiz/questions-by-quiz/${quizId}`) 
           .then((response) => {
             console.log("Quiz data:", response.data);
             setQuestions(response.data);

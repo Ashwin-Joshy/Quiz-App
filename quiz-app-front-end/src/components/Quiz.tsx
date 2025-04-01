@@ -3,10 +3,11 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 interface Quiz {
-    id: string;
+    _id: string;
     name: string;
     time: string;
     difficulty: "Easy" | "Medium" | "Hard";
+    questions: string[]; 
 }
 
 const Quiz = () => {
@@ -15,18 +16,23 @@ const Quiz = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
-      useEffect(() => {
+
+    const handleStartQuiz = (id: any, questions: string[]) => {
+        navigate(`/quiz/${id}`, { state: { questions } });
+    };
+
+    useEffect(() => {
         axios
-          .get<Quiz[]>("http://localhost:3000/quiz") 
-          .then((response) => {
-            setQuizzes(response.data);
-            setLoading(false);
-          })
-          .catch((error) => {
-            setError("Failed to load quizzes.");
-            setLoading(false);
-          });
-      }, []);
+            .get<Quiz[]>("http://localhost:3000/quiz")
+            .then((response) => {
+                setQuizzes(response.data);
+                setLoading(false);
+            })
+            .catch((error) => {
+                setError("Failed to load quizzes.");
+                setLoading(false);
+            });
+    }, []);
     // useEffect(() => {
     //     // Temporary dummy data until backend is implemented
     //     const dummyQuizzes: Quiz[] = [
@@ -57,18 +63,18 @@ const Quiz = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {quizzes.map((quiz) => (
                     <div
-                        onClick={() => navigate(`/quiz/${quiz.id}`)} 
-                        key={quiz.id}
+                        onClick={() => handleStartQuiz(quiz._id, quiz.questions)}
+                        key={quiz._id}
                         className="bg-white shadow-lg rounded-lg p-6 transition-transform transform hover:scale-105"
                     >
                         <h2 className="text-xl font-semibold text-gray-700">{quiz.name}</h2>
                         <p className="text-gray-500">⏳ {quiz.time} minutes</p>
                         <p
                             className={`text-sm font-medium mt-2 inline-block px-3 py-1 rounded-full ${quiz.difficulty === "Easy"
-                                    ? "bg-green-200 text-green-700"
-                                    : quiz.difficulty === "Medium"
-                                        ? "bg-yellow-200 text-yellow-700"
-                                        : "bg-red-200 text-red-700"
+                                ? "bg-green-200 text-green-700"
+                                : quiz.difficulty === "Medium"
+                                    ? "bg-yellow-200 text-yellow-700"
+                                    : "bg-red-200 text-red-700"
                                 }`}
                         >
                             {quiz.difficulty}

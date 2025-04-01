@@ -1,5 +1,6 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { Question } from './question.schema';
 
 @Schema()
 export class Quiz extends Document {
@@ -9,7 +10,7 @@ export class Quiz extends Document {
   @Prop({ required: true })
   time: number;
 
-  @Prop({ required: true, enum: ['easy', 'medium', 'hard'] })
+  @Prop({ required: true, enum: ['Easy', 'Medium', 'H ard'] })
   difficulty: string;
 
   @Prop({ required: true })
@@ -17,6 +18,9 @@ export class Quiz extends Document {
 
   @Prop({ required: true })
   createdBy: string;
+
+  @Prop() 
+  questions: Types.ObjectId[]; 
 }
 
 export const QuizSchema = SchemaFactory.createForClass(Quiz);

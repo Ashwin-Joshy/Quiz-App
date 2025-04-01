@@ -1,4 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateQuizDto } from './dto/quiz.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Question } from './schemas/question.schema';
+import { Model } from 'mongoose';
+import { Quiz } from './schemas/quiz.schema';
 
 @Injectable()
 export class QuizService {
@@ -28,7 +33,7 @@ export class QuizService {
                 correctAnswer: "Cascading Style Sheets",
             },
         ],
-        2:[
+        2: [
             {
                 id: "1",
                 question: "What is the capital of Japan?",
@@ -48,7 +53,7 @@ export class QuizService {
                 correctAnswer: "HyperText Markup Language",
             },
         ],
-        3:[
+        3: [
             {
                 id: "1",
                 question: "What is the capital of Italy?",
@@ -69,10 +74,29 @@ export class QuizService {
             },
         ]
     }
+    constructor(
+        @InjectModel(Question.name) private questionModel: Model<Question>,
+        @InjectModel(Quiz.name) private quizModel: Model<Quiz>
+    ) { }
 
-    getAllQuiz() {
-        return this.quizzes;
+    async getAllQuiz() {
+        const quiz = await this.quizModel.find({ isPrivate: false }).exec();
+        return quiz
     }
+
+    async getQuestionsByQuizId(id: string) {
+        const quiz= await this.quizModel.findById(id)
+        if (!quiz) {
+            throw new NotFoundException(`Quiz with ID ${id} not found`);
+        }
+        const questions = await this.questionModel.find({ _id: { $in: quiz.questions } }).exec();
+        if (!questions) {
+            throw new NotFoundException(`Questions for Quiz ID ${id} not found`);
+        }
+        return questions;
+
+    }
+
     getQuizById(id: number) {
         const quiz = this.questions[id]
         if (!quiz) {
@@ -80,4 +104,36 @@ export class QuizService {
         }
         return quiz;
     }
+    async createNewQuiz(createQuizDto: CreateQuizDto): Promise<Quiz> {
+        const { name, time, difficulty, isPrivate, questions } = createQuizDto;
+        console.log("Inpiut", createQuizDto);
+        
+
+        // Create and save all questions in parallel
+        const questionDocs = await Promise.all(
+            questions.map(async (question) => {
+                const newQuestion = new this.questionModel({
+                    question: question.question,
+                    options: question.options
+                });
+                return newQuestion.save(); // Return the saved document
+            })
+        );
+
+        // Extract saved question IDs
+        const questionIds = questionDocs.map(q => q._id);
+
+        // Create the quiz with linked questions
+        const newQuiz = new this.quizModel({
+            name,
+            time,
+            difficulty,
+            createdBy: "admin",
+            isPrivate,
+            questions: questionIds
+        });
+
+        return newQuiz.save();
+    }
+
 }

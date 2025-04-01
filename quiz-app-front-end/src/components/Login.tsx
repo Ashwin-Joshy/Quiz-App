@@ -1,94 +1,106 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import axios from "axios";
 import QuizDialog from "../utils/QuizDialog";
 
 const Login = () => {
-    const [isSignup, setIsSignup] = useState(false);
-    const [formData, setFormData] = useState({ email: "", password: "" });
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [image, setImage] = useState("");
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const url = isSignUp ? "http://localhost:3000/user/create-user" : "http://localhost:3000/user/login-user";
+      const payload = isSignUp ? { email, password, name, phone, image } : { email, password };
+      const response = await axios.post(url, payload);
+      console.log(isSignUp ? "Signup Success:" : "Login Success:", response.data);
+      setIsModalOpen(true);
+    } catch (err) {
+      setError(isSignUp ? "Signup failed. Please check your details." : "Login failed. Please check your credentials.");
+    }
+  };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            // Simulated API request (replace with actual API call)
-            await new Promise((resolve) => setTimeout(resolve, 1000));
-            setIsModalOpen(true);
-        } catch (error) {
-            console.error("Error during authentication", error);
-        }
-    };
-
-    return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="bg-white p-8 rounded-lg shadow-md w-96">
-                <h2 className="text-2xl font-semibold text-center mb-6">
-                    {isSignup ? "Sign Up" : "Login"}
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    />
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                        {isSignup ? "Sign Up" : "Login"}
-                    </button>
-                </form>
-                <p className="text-center mt-4">
-                    {isSignup ? "Already have an account? " : "Don't have an account? "}
-                    <button
-                        onClick={() => setIsSignup(!isSignup)}
-                        className="text-blue-500 hover:underline"
-                    >
-                        {isSignup ? "Login" : "Sign Up"}
-                    </button>
-                </p>
-            </div>
-
-            {/* Success Modal */}
-            {/* <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} className="fixed inset-0 flex items-center justify-center backdrop-blur-md">
-                <DialogPanel className="bg-white p-6 rounded-lg shadow-lg text-center">
-                    <DialogTitle className="text-xl font-bold">Login Success</DialogTitle>
-                    <button
-                        onClick={() => navigate("/")}
-                        className="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                        Go to Home
-                    </button>
-                </DialogPanel>
-            </Dialog> */}
-            <QuizDialog
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                title="Login Success"
-                actionButton={{ label: "Go to Home", onClick: () => navigate("/") }}
-            >
-                <p>You have successfully logged in.</p>
-            </QuizDialog>
-        </div>
-    );
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-6 rounded-lg shadow-md w-96">
+        <h2 className="text-2xl font-bold text-center mb-4">{isSignUp ? "Sign Up" : "Login"}</h2>
+        {error && <p className="text-red-500 text-center">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          {isSignUp && (
+            <>
+              <input
+                type="text"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full p-2 border rounded mb-2"
+                required
+              />
+              <input
+                type="tel"
+                placeholder="Phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full p-2 border rounded mb-2"
+                required
+              />
+              <input
+                type="text"
+                placeholder="Image URL"
+                value={image}
+                onChange={(e) => setImage(e.target.value)}
+                className="w-full p-2 border rounded mb-2"
+                required
+              />
+            </>
+          )}
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full p-2 border rounded mb-2"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full p-2 border rounded mb-4"
+            required
+          />
+          <button
+            type="submit"
+            className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            {isSignUp ? "Sign Up" : "Login"}
+          </button>
+        </form>
+        <p className="text-center mt-4">
+          {isSignUp ? "Already have an account?" : "Don't have an account?"} 
+          <button onClick={() => setIsSignUp(!isSignUp)} className="text-blue-500 hover:underline ml-1">
+            {isSignUp ? "Login here" : "Sign up here"}
+          </button>
+        </p>
+      </div>
+      <QuizDialog
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={isSignUp ? "Signup Success" : "Login Success"}
+        actionButton={{ label: "Go to Home", onClick: () => navigate("/") }}
+      >
+        <p>{isSignUp ? "Your account has been created successfully!" : "Welcome back! You have successfully logged in."}</p>
+      </QuizDialog>
+    </div>
+  );
 };
 
 export default Login;
