@@ -6,11 +6,14 @@ export type ResultDocument = Result & Document;
 
 @Schema()
 export class Result {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
-  userId: string;
+  @Prop({ required: true })
+  userEmail: string;
 
-  @Prop({ type: Types.ObjectId, ref: 'Question', required: true })
+  @Prop({required: true })
   questionId: string;
+
+  @Prop({ required: true })
+  quizId: string;
 
   @Prop({ required: true })
   correctAnswer: string;

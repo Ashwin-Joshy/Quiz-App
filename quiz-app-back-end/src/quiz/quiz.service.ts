@@ -5,6 +5,7 @@ import { Question } from './schemas/question.schema';
 import { Model } from 'mongoose';
 import { Quiz } from './schemas/quiz.schema';
 import { Answer } from './schemas/answer.schema';
+import { Result } from './schemas/result.schema';
 
 @Injectable()
 export class QuizService {
@@ -78,7 +79,8 @@ export class QuizService {
     constructor(
         @InjectModel(Question.name) private questionModel: Model<Question>,
         @InjectModel(Quiz.name) private quizModel: Model<Quiz>,
-        @InjectModel(Answer.name) private answerModel: Model<Answer>
+        @InjectModel(Answer.name) private answerModel: Model<Answer>,
+        @InjectModel(Result.name) private resultModel: Model<Result>,
     ) { }
 
     async getAllQuiz() {
@@ -139,15 +141,39 @@ export class QuizService {
 
         return newQuiz.save();
     }
-    async submitQuiz(quizData: SubmitQuizDto) {
+    async submitQuiz(quizData: SubmitQuizDto, email: string) {
         const { quizId, data }: (any) = quizData;
-        // const quiz = await this.quizModel.findById(quizId).exec();
-        // if (!quiz) {
-        //     throw new NotFoundException(`Quiz with ID ${quizId} not found`);
-        // }
-        const correctAnswer = await this.questionModel.find({ _id: { $in: data.questionId } }).exec();
-        //const userResult = 
 
+        const correctAnswersWithQuestions = await this.questionModel.find({ _id: { $in: data.questionId } }).exec();
+        const userScore = this.findUserScore(data, correctAnswersWithQuestions);
+        const totalScore = correctAnswersWithQuestions.length;
+        const percentage = (userScore / totalScore) * 100;
+        await this.saveResults(data, quizId, email, correctAnswersWithQuestions);
+        return "Quiz submitted successfully! Your score is " + userScore + " out of " + totalScore + " (" + percentage.toFixed(2) + "%)";
     }
-
+    findUserScore(questionIdWithAnswer: any, correctAnswersWithQuestions: any) {
+        let score = 0;
+        questionIdWithAnswer.forEach((question: any) => {
+            const correctAnswer = correctAnswersWithQuestions.find((q: any) => q._id.toString() === question.questionId);
+            if (correctAnswer && correctAnswer.answer === question.answer) {
+                score++;
+            }
+        });
+        return score;
+    }
+    saveResults(userAnswerWithQuestionIds: any, quizId: string, email: string, correctAnswersWithQuestions: any) {
+        const results = userAnswerWithQuestionIds.map((question: any) => {
+            const correctAnswer = correctAnswersWithQuestions.find((q: any) => q._id.toString() === question.questionId);
+            return {
+                userEmail: email,
+                questionId: question.questionId,
+                quizId: quizId,
+                correctAnswer: correctAnswer.answer,
+                userAnswer: question.answer,
+                isCorrect: correctAnswer.answer === question.answer,
+                attenmptedAt: new Date()
+            };
+        });
+        return this.resultModel.insertMany(results);
+    }
 }

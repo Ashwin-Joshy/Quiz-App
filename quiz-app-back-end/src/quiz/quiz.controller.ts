@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Request, UseGuards } from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { CreateQuizDto, SubmitQuizDto } from './dto/quiz.dto';
+import { JwtAuthGuard } from 'src/user/jwtAuthGuard';
 
 @Controller('quiz')
 export class QuizController {
@@ -15,7 +16,7 @@ export class QuizController {
     getQuestionsByQuizId(@Param('id') id: string) {
         return this.quizService.getQuestionsByQuizId(id);
     }
-    
+
     @Get(':id')
     getQuizById(@Param('id', ParseIntPipe) id: number) {
         return this.quizService.getQuizById(id);
@@ -26,8 +27,9 @@ export class QuizController {
         return this.quizService.createNewQuiz(createQuizDto);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post('submit-quiz')
-    async submitQuiz(@Body() data:SubmitQuizDto) {
-        return this.quizService.submitQuiz(data);
+    async submitQuiz(@Request() req, @Body() data: SubmitQuizDto) {
+        return this.quizService.submitQuiz(data, req.user.email);
     }
 }
