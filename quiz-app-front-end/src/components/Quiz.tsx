@@ -7,7 +7,7 @@ interface Quiz {
     name: string;
     time: string;
     difficulty: "Easy" | "Medium" | "Hard";
-    questions: string[]; 
+    questions: string[];
 }
 
 const Quiz = () => {
@@ -15,37 +15,51 @@ const Quiz = () => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
+    useEffect(() => {
+        // Check if user is logged in (based on token in localStorage)
+        const token = localStorage.getItem("token");
+        setIsLoggedIn(!!token);
+    }, []);
 
-    const handleStartQuiz = (id: any, questions: string[]) => {
+    const handleStartQuiz = (id: string, questions: string[]) => {
         navigate(`/quiz/${id}`, { state: { questions } });
+    };
+
+    const handleCreateQuiz = () => {
+        navigate("/create-quiz");
+    };
+
+    const handleDeleteQuiz = (id: string) => {
+        if (window.confirm("Are you sure you want to delete this quiz?")) {
+            axios
+                .delete(`http://localhost:3000/quiz/${id}`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+                })
+                .then(() => {
+                    setQuizzes((prev) => prev.filter((quiz) => quiz._id !== id));
+                })
+                .catch(() => {
+                    alert("Failed to delete quiz");
+                });
+        }
     };
 
     useEffect(() => {
         axios
             .get<Quiz[]>("http://localhost:3000/quiz")
             .then((response) => {
+                console.log("Quizzes:", response.data);
+                
                 setQuizzes(response.data);
                 setLoading(false);
             })
-            .catch((error) => {
+            .catch(() => {
                 setError("Failed to load quizzes.");
                 setLoading(false);
             });
     }, []);
-    // useEffect(() => {
-    //     // Temporary dummy data until backend is implemented
-    //     const dummyQuizzes: Quiz[] = [
-    //         { id: "1", name: "JavaScript Basics", time: "10", difficulty: "Easy" },
-    //         { id: "2", name: "React Fundamentals", time: "15", difficulty: "Medium" },
-    //         { id: "3", name: "Node.js Mastery", time: "20", difficulty: "Hard" },
-    //     ];
-
-    //     setTimeout(() => {
-    //         setQuizzes(dummyQuizzes);
-    //         setLoading(false);
-    //     }, 1000); // Simulate API delay
-    // }, []);
 
     if (loading) {
         return <div className="text-center text-lg mt-10">Loading...</div>;
@@ -57,28 +71,54 @@ const Quiz = () => {
 
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
-                Available Quizzes
-            </h1>
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-3xl font-bold text-gray-800">Available Quizzes</h1>
+                {isLoggedIn && (
+                    <div className="flex gap-4">
+                        <button
+                            onClick={handleCreateQuiz}
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Create Quiz
+                        </button>
+                    </div>
+                )}
+            </div>
+
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {quizzes.map((quiz) => (
                     <div
-                        onClick={() => handleStartQuiz(quiz._id, quiz.questions)}
                         key={quiz._id}
-                        className="bg-white shadow-lg rounded-lg p-6 transition-transform transform hover:scale-105"
+                        className="bg-white shadow-lg rounded-lg p-6 transition-transform transform hover:scale-105 relative"
                     >
                         <h2 className="text-xl font-semibold text-gray-700">{quiz.name}</h2>
                         <p className="text-gray-500">⏳ {quiz.time} minutes</p>
                         <p
-                            className={`text-sm font-medium mt-2 inline-block px-3 py-1 rounded-full ${quiz.difficulty === "Easy"
-                                ? "bg-green-200 text-green-700"
-                                : quiz.difficulty === "Medium"
+                            className={`text-sm font-medium mt-2 inline-block px-3 py-1 rounded-full ${
+                                quiz.difficulty === "Easy"
+                                    ? "bg-green-200 text-green-700"
+                                    : quiz.difficulty === "Medium"
                                     ? "bg-yellow-200 text-yellow-700"
                                     : "bg-red-200 text-red-700"
-                                }`}
+                            }`}
                         >
                             {quiz.difficulty}
                         </p>
+                        <button
+                            onClick={() => handleStartQuiz(quiz._id, quiz.questions)}
+                            className="mt-4 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                            Start Quiz
+                        </button>
+
+                        {isLoggedIn && (
+                            <button
+                                onClick={() => handleDeleteQuiz(quiz._id)}
+                                className="absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white text-sm font-bold py-1 px-3 rounded"
+                            >
+                                Delete
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>

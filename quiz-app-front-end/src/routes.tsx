@@ -1,5 +1,6 @@
 import { lazy } from "react";
 import { RouteObject } from "react-router-dom";
+import CreateQuiz from "./components/CreateQuiz";
 // Lazy loading for performance optimization
 const Home = lazy(() => import("./components/Home"));
 const Quiz = lazy(() => import("./components/Quiz"));
@@ -14,6 +15,7 @@ const routes:RouteObject[] = [
   { path: "/quiz/:quizId", element: <QuizSession /> },
   { path: "/profile", element: <Profile /> },
   { path: "/login", element: <Login /> },
+  { path: "/create-quiz", element: <CreateQuiz /> }
 ];
 
 export default routes;

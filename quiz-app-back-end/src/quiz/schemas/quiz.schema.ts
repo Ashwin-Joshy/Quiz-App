@@ -10,7 +10,7 @@ export class Quiz extends Document {
   @Prop({ required: true })
   time: number;
 
-  @Prop({ required: true, enum: ['Easy', 'Medium', 'H ard'] })
+  @Prop({ required: true, enum: ['Easy', 'Medium', 'Hard'] })
   difficulty: string;
 
   @Prop({ required: true })

@@ -143,8 +143,12 @@ export class QuizService {
     }
     async submitQuiz(quizData: SubmitQuizDto, email: string) {
         const { quizId, data }: (any) = quizData;
-
-        const correctAnswersWithQuestions = await this.questionModel.find({ _id: { $in: data.questionId } }).exec();
+        const questionId = data.map((question: any) => question.questionId);
+        const correctAnswersWithQuestions = await this.questionModel.find({ _id: { $in: questionId } }).exec();
+        if (!correctAnswersWithQuestions) {
+            throw new NotFoundException(`Quiz with ID ${quizId} not found`);
+        }
+        console.log("Quia Data", correctAnswersWithQuestions);
         const userScore = this.findUserScore(data, correctAnswersWithQuestions);
         const totalScore = correctAnswersWithQuestions.length;
         const percentage = (userScore / totalScore) * 100;
@@ -175,5 +179,12 @@ export class QuizService {
             };
         });
         return this.resultModel.insertMany(results);
+    }
+    async deleteAll() {
+        await this.quizModel.deleteMany({});
+        await this.questionModel.deleteMany({});
+        await this.answerModel.deleteMany({});
+        await this.resultModel.deleteMany({});
+        return "All quizzes, questions, answers and results deleted successfully!";
     }
 }

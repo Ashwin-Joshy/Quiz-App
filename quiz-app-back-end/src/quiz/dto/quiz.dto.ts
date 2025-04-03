@@ -59,8 +59,8 @@ export class SubmitQuizDto{
   
   @IsString()
   @IsNotEmpty()
-  userId: string; 
-  
+  userEmail: string; 
+
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => SubmittedDataDto)

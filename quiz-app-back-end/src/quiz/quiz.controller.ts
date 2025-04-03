@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Request, UseGuards } from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { CreateQuizDto, SubmitQuizDto } from './dto/quiz.dto';
 import { JwtAuthGuard } from 'src/user/jwtAuthGuard';
@@ -31,5 +31,10 @@ export class QuizController {
     @Post('submit-quiz')
     async submitQuiz(@Request() req, @Body() data: SubmitQuizDto) {
         return this.quizService.submitQuiz(data, req.user.email);
+    }
+
+    @Delete('delete-all')
+    async deleteAll() {
+        return this.quizService.deleteAll();
     }
 }
