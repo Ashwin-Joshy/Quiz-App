@@ -14,12 +14,13 @@ const QuizSession = () => {
   const { quizId } = useParams<{ quizId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const questionsIds = location.state?.questions || [];
+  const quizName = location.state?.name || [];
+  const quizTime = location.state?.time || 0; 
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: string]: string }>({});
-  const [timeLeft, setTimeLeft] = useState<number>(300); // 5 minutes countdown
+  const [timeLeft, setTimeLeft] = useState<number>(0); // 5 minutes countdown
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [quizResult, setQuizResult] = useState<any>(""); // Assuming quiz result is an object
 
@@ -35,10 +36,15 @@ const QuizSession = () => {
     });
 
     api
-      .get<Question[]>(`http://localhost:3000/quiz/questions-by-quiz/${quizId}`)
+      .get<Question[]>(`http://localhost:3000/quiz/questions-by-quiz/${quizId}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      )
       .then((response) => {
         
         setQuestions(response.data);
+        setTimeLeft(quizTime / 1000);
         setLoading(false);
       })
       .catch(() => {
@@ -86,6 +92,7 @@ const QuizSession = () => {
 
     const payload = {
       quizId,
+      quizName,
       userEmail,
       data: Object.entries(selectedAnswers).map(([questionId, answer]) => ({
         questionId,

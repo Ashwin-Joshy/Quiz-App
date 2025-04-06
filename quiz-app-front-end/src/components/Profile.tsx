@@ -1,4 +1,6 @@
-import { useState } from "react";
+import axios from "axios";
+import { use, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface User {
   photo: string;
@@ -22,23 +24,41 @@ const Profile = () => {
     password: "password123",
     phone: "123-456-7890",
   });
-
-  const [quizAttempts, setQuizAttempts] = useState<QuizAttempt[]>([
-    { id: "1", name: "JavaScript Basics", grade: "A" },
-    { id: "2", name: "React Fundamentals", grade: "B+" },
-    { id: "3", name: "Node.js Mastery", grade: "A-" },
-  ]);
-
+  ;
+  const [prevResults, setPrevResults] = useState<any[]>([]);
+  const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
-  
+
+  useEffect(() => {
+    const email = localStorage.getItem("email");
+    if (email) {
+      //call axios get get-all-results
+      const prevviousResults = axios.get(`http://localhost:3000/quiz/get-all-results`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
+      )
+        .then((response) => {
+          console.log("Previous Results:", response.data);
+          setPrevResults(response.data);
+        })
+        .catch(() => {
+          alert("Failed to load previous results");
+        });
+    }
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
+  };
+  const handleViewAnswer = (id: string) => {
+    navigate(`/quiz/get-quiz-result/${id}`);
   };
 
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-3xl font-bold text-gray-800 mb-4">Profile</h1>
-      
+
       {/* User Details Section */}
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex items-center gap-4">
@@ -98,17 +118,17 @@ const Profile = () => {
           <thead>
             <tr className="bg-gray-100">
               <th className="border p-2">Quiz</th>
-              <th className="border p-2">Grade</th>
+              <th className="border p-2">Score</th>
               <th className="border p-2">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {quizAttempts.map((quiz) => (
-              <tr key={quiz.id} className="text-center">
-                <td className="border p-2">{quiz.name}</td>
-                <td className="border p-2 font-bold">{quiz.grade}</td>
+            {prevResults.map((quiz) => (
+              <tr key={quiz._id} className="text-center">
+                <td className="border p-2">{quiz.quizName}</td>
+                <td className="border p-2 font-bold">{quiz.scorePercentage}%</td>
                 <td className="border p-2">
-                  <button className="bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded">
+                  <button onClick={() => handleViewAnswer(quiz._id)} className="bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded">
                     View Answers
                   </button>
                 </td>

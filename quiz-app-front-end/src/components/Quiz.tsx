@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 interface Quiz {
     _id: string;
     name: string;
     time: string;
+    createdBy: string;
     difficulty: "Easy" | "Medium" | "Hard";
     questions: string[];
 }
@@ -15,16 +17,16 @@ const Quiz = () => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+    const { isLoggedIn, setIsLoggedIn, getEmail } = useContext(AuthContext)!;
 
     useEffect(() => {
-        // Check if user is logged in (based on token in localStorage)
         const token = localStorage.getItem("token");
-        setIsLoggedIn(!!token);
     }, []);
 
-    const handleStartQuiz = (id: string, questions: string[]) => {
-        navigate(`/quiz/${id}`, { state: { questions } });
+    const handleStartQuiz = (id: string, name:string, time:string) => {
+        //convert minutes to milliseconds
+        const timeInMilliseconds = parseInt(time) * 60 * 1000;
+        navigate(`/quiz/${id}`, { state: { name, time:timeInMilliseconds } });
     };
 
     const handleCreateQuiz = () => {
@@ -34,7 +36,7 @@ const Quiz = () => {
     const handleDeleteQuiz = (id: string) => {
         if (window.confirm("Are you sure you want to delete this quiz?")) {
             axios
-                .delete(`http://localhost:3000/quiz/${id}`, {
+                .delete(`http://localhost:3000/quiz/delete-quiz/${id}`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 })
                 .then(() => {
@@ -50,12 +52,12 @@ const Quiz = () => {
         axios
             .get<Quiz[]>("http://localhost:3000/quiz")
             .then((response) => {
-                console.log("Quizzes:", response.data);
-                
                 setQuizzes(response.data);
                 setLoading(false);
             })
-            .catch(() => {
+            .catch((err) => {
+                console.log("Error:", err);
+                
                 setError("Failed to load quizzes.");
                 setLoading(false);
             });
@@ -105,13 +107,13 @@ const Quiz = () => {
                             {quiz.difficulty}
                         </p>
                         <button
-                            onClick={() => handleStartQuiz(quiz._id, quiz.questions)}
+                            onClick={() => handleStartQuiz(quiz._id, quiz.name, quiz.time)}
                             className="mt-4 w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                         >
                             Start Quiz
                         </button>
 
-                        {isLoggedIn && (
+                        {isLoggedIn && getEmail == quiz.createdBy && (
                             <button
                                 onClick={() => handleDeleteQuiz(quiz._id)}
                                 className="absolute top-2 right-2 bg-red-500 hover:bg-red-700 text-white text-sm font-bold py-1 px-3 rounded"

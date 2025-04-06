@@ -108,7 +108,7 @@ export class QuizService {
         }
         return quiz;
     }
-    async createNewQuiz(createQuizDto: CreateQuizDto): Promise<Quiz> {
+    async createNewQuiz(createQuizDto: CreateQuizDto, email: string): Promise<Quiz> {
         const { name, time, difficulty, isPrivate, questions } = createQuizDto;
         console.log("Inpiut", createQuizDto);
 
@@ -134,7 +134,7 @@ export class QuizService {
             name,
             time,
             difficulty,
-            createdBy: "admin",
+            createdBy: email,
             isPrivate,
             questions: questionIds
         });
@@ -142,7 +142,7 @@ export class QuizService {
         return newQuiz.save();
     }
     async submitQuiz(quizData: SubmitQuizDto, email: string) {
-        const { quizId, data }: (any) = quizData;
+        const { quizId, quizName, data }: (any) = quizData;
         const questionId = data.map((question: any) => question.questionId);
         const correctAnswersWithQuestions = await this.questionModel.find({ _id: { $in: questionId } }).exec();
         if (!correctAnswersWithQuestions) {
@@ -152,7 +152,7 @@ export class QuizService {
         const userScore = this.findUserScore(data, correctAnswersWithQuestions);
         const totalScore = correctAnswersWithQuestions.length;
         const percentage = (userScore / totalScore) * 100;
-        await this.saveResults(data, quizId, email, correctAnswersWithQuestions);
+        await this.saveResults(data, quizId, quizName, email, correctAnswersWithQuestions, percentage);
         return "Quiz submitted successfully! Your score is " + userScore + " out of " + totalScore + " (" + percentage.toFixed(2) + "%)";
     }
     findUserScore(questionIdWithAnswer: any, correctAnswersWithQuestions: any) {
@@ -165,20 +165,26 @@ export class QuizService {
         });
         return score;
     }
-    saveResults(userAnswerWithQuestionIds: any, quizId: string, email: string, correctAnswersWithQuestions: any) {
-        const results = userAnswerWithQuestionIds.map((question: any) => {
+    async saveResults(userAnswerWithQuestionIds: any, quizId: string, quizName, email: string, correctAnswersWithQuestions: any, percentage: number) {
+        const quizDetails = userAnswerWithQuestionIds.map((question: any) => {
             const correctAnswer = correctAnswersWithQuestions.find((q: any) => q._id.toString() === question.questionId);
             return {
-                userEmail: email,
-                questionId: question.questionId,
-                quizId: quizId,
+                question: correctAnswer.question,
                 correctAnswer: correctAnswer.answer,
                 userAnswer: question.answer,
                 isCorrect: correctAnswer.answer === question.answer,
-                attenmptedAt: new Date()
+                ...(correctAnswer.explanation && { explanation: correctAnswer.explanation })
             };
         });
-        return this.resultModel.insertMany(results);
+        const result = new this.resultModel({
+            userEmail: email,
+            quizId: quizId,
+            quizName: quizName,
+            scorePercentage: percentage,
+            quizDetails: quizDetails,
+            submittedAt: new Date()
+        })
+        return result.save();
     }
     async deleteAll() {
         await this.quizModel.deleteMany({});
@@ -186,5 +192,53 @@ export class QuizService {
         await this.answerModel.deleteMany({});
         await this.resultModel.deleteMany({});
         return "All quizzes, questions, answers and results deleted successfully!";
+    }
+    async deleteQuiz(id: string, email: string) {
+        const quiz = await this.quizModel.findById(id);
+        if (!quiz) {
+            throw new NotFoundException(`Quiz with ID ${id} not found`);
+        }
+        if (quiz.createdBy !== email) {
+            throw new NotFoundException(`You are not authorized to delete this quiz`);
+        }
+        await this.quizModel.deleteOne({ _id: id });
+        return `Quiz with ID ${id} deleted successfully!`;
+    }
+
+    async getAllResults(email: string) {
+        const results = await this.resultModel.find({ userEmail: email })
+            .select({
+                _id: 1,
+                quizId: 1,
+                quizName: 1,
+                scorePercentage: 1,
+                submittedAt: 1,
+                // quizDetails: {
+                //     $map: {
+                //         input: "$quizDetails",
+                //         as: "detail",
+                //         in: {
+                //             question: "$$detail.question",
+                //             correctAnswer: "$$detail.correctAnswer",
+                //             userAnswer: "$$detail.userAnswer",
+                //             isCorrect: "$$detail.isCorrect",
+                //         },
+                //     },
+                // },
+            })
+            .sort({ submittedDate: -1 })
+            .exec();
+        if (!results) {
+            return [];
+        }
+        return results;
+    }
+    async getQuizResult(id: string, email: string) {
+        const result= await this.resultModel.findOne({ _id: id })
+            .select({
+                quizDetails: 1
+            })
+            .exec();
+        return result;
     }
 }

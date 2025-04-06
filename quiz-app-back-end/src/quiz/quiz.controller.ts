@@ -12,9 +12,21 @@ export class QuizController {
         return this.quizService.getAllQuiz();
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('questions-by-quiz/:id')
     getQuestionsByQuizId(@Param('id') id: string) {
         return this.quizService.getQuestionsByQuizId(id);
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('get-all-results')
+    async getAllResults(@Request() req) {
+        return this.quizService.getAllResults(req.user.email);
+    }
+    @UseGuards(JwtAuthGuard)
+    @Get('get-quiz-result/:id')
+    async getQuizResult(@Param('id') id: string, @Request() req) {
+        return this.quizService.getQuizResult(id, req.user.email);
     }
 
     @Get(':id')
@@ -22,9 +34,10 @@ export class QuizController {
         return this.quizService.getQuizById(id);
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post('create-new-quiz')
-    async createNewQuiz(@Body() createQuizDto: CreateQuizDto) {
-        return this.quizService.createNewQuiz(createQuizDto);
+    async createNewQuiz(@Request() req, @Body() createQuizDto: CreateQuizDto) {
+        return this.quizService.createNewQuiz(createQuizDto, req.user.email);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -33,8 +46,16 @@ export class QuizController {
         return this.quizService.submitQuiz(data, req.user.email);
     }
 
+    @UseGuards(JwtAuthGuard)
+    @Delete('delete-quiz/:id')
+    async deleteQuiz(@Param('id') id: string, @Request() req, ) {
+        return this.quizService.deleteQuiz(id,req.user.email);
+    }
+
+
     @Delete('delete-all')
     async deleteAll() {
         return this.quizService.deleteAll();
     }
+    
 }

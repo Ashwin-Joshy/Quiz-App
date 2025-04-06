@@ -56,6 +56,10 @@ export class SubmitQuizDto{
   @IsString()
   @IsNotEmpty()
   quizId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  quizName: string;
   
   @IsString()
   @IsNotEmpty()

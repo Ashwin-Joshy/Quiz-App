@@ -25,6 +25,7 @@ const Login = () => {
       console.log(isSignUp ? "Signup Success:" : "Login Success:", response.data);
       if(!isSignUp) {
         localStorage.setItem("token", response.data.access_token);
+        localStorage.setItem("email", JSON.stringify(response.data.email));
         setIsLoggedIn(true);
       }
       setIsModalOpen(true);

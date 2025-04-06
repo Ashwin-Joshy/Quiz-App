@@ -1,19 +1,9 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose'; 
+import { Document, Types } from 'mongoose';
 
-
-export type ResultDocument = Result & Document;
-
-@Schema()
-export class Result {
+class QuizDetail {
   @Prop({ required: true })
-  userEmail: string;
-
-  @Prop({required: true })
-  questionId: string;
-
-  @Prop({ required: true })
-  quizId: string;
+  question: string;
 
   @Prop({ required: true })
   correctAnswer: string;
@@ -24,8 +14,31 @@ export class Result {
   @Prop({ required: true })
   isCorrect: boolean;
 
+  @Prop()
+  explanation?: string;
+}
+
+export type ResultDocument = Result & Document;
+
+@Schema()
+export class Result {
   @Prop({ required: true })
-  attenmptedAt: Date;
+  userEmail: string;
+
+  @Prop({ required: true })
+  quizId: string;
+
+  @Prop({ required: true })
+  quizName: string;
+
+  @Prop({ required: true })
+  scorePercentage: number;
+
+  @Prop({ type: [QuizDetail], required: true })
+  quizDetails: QuizDetail[];
+
+  @Prop({ required: true })
+  submittedAt: Date;
 }
 
 export const ResultSchema = SchemaFactory.createForClass(Result);
