@@ -1,5 +1,4 @@
-import { useContext, useEffect, useState } from "react";
-import { FaUserCircle } from "react-icons/fa";
+import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 

@@ -17,11 +17,7 @@ const Quiz = () => {
     const [quizzes, setQuizzes] = useState<Quiz[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    const { isLoggedIn, setIsLoggedIn, getEmail } = useContext(AuthContext)!;
-
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-    }, []);
+    const { isLoggedIn, getEmail } = useContext(AuthContext)!;
 
     const handleStartQuiz = (id: string, name:string, time:string) => {
         //convert minutes to milliseconds
