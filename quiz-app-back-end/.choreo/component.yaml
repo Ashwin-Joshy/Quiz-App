@@ -5,7 +5,7 @@ source:
   type: git
   repository: https://github.com/Ashwin-Joshy/Quiz-App
   branch: master
-  context: quiz-app-back-end
+  context: /
 build:
   env:
     - name: NODE_ENV
