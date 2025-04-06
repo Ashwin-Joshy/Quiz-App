@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { prefix } from "../enums/prefix";
 
 interface User {
   image: string;
@@ -27,7 +28,7 @@ const Profile = () => {
     setEditing(editStatus);
     if (!editStatus) {
       const token = localStorage.getItem("token");
-    axios.put<User>(`http://localhost:3000/user/update-profile`, user,
+    axios.put<User>(`${prefix}/user/update-profile`, user,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -43,7 +44,7 @@ const Profile = () => {
   }
   useEffect(() => {
     const token = localStorage.getItem("token");
-    axios.get<User>(`http://localhost:3000/user/profile`,
+    axios.get<User>(`${prefix}/user/profile`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -54,7 +55,7 @@ const Profile = () => {
       .catch(() => {
         alert("Failed to load user details");
       });
-    axios.get(`http://localhost:3000/quiz/get-all-results`,
+    axios.get(`${prefix}/quiz/get-all-results`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

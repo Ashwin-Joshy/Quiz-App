@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../utils/axiosInstance";
+import { prefix } from "../enums/prefix";
 
 interface QuizDetail {
   question: string;
@@ -19,7 +20,7 @@ const AnswerViewer = () => {
 
   useEffect(() => {
     api
-      .get<{ quizDetails: QuizDetail[] }>(`http://localhost:3000/quiz/get-quiz-result/${id}`)
+      .get<{ quizDetails: QuizDetail[] }>(`${prefix}/quiz/get-quiz-result/${id}`)
       .then((response) => {
         console.log("Quiz Details:", response.data);
         

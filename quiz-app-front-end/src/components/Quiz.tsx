@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { prefix } from "../enums/prefix";
 
 interface Quiz {
     _id: string;
@@ -32,7 +33,7 @@ const Quiz = () => {
     const handleDeleteQuiz = (id: string) => {
         if (window.confirm("Are you sure you want to delete this quiz?")) {
             axios
-                .delete(`http://localhost:3000/quiz/delete-quiz/${id}`, {
+                .delete(`${prefix}/quiz/delete-quiz/${id}`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
                 })
                 .then(() => {
@@ -46,7 +47,7 @@ const Quiz = () => {
 
     useEffect(() => {
         axios
-            .get<Quiz[]>("http://localhost:3000/quiz")
+            .get<Quiz[]>(`${prefix}/quiz`)
             .then((response) => {
                 setQuizzes(response.data);
                 setLoading(false);

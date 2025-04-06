@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { prefix } from "../enums/prefix";
 
 interface Question {
   question: string;
@@ -42,7 +43,7 @@ const CreateQuiz = () => {
 
   const handleSubmit = async () => {
     try {
-      await axios.post("http://localhost:3000/quiz/create-new-quiz", quiz, {
+      await axios.post(`${prefix}/quiz/create-new-quiz`, quiz, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       navigate("/quiz");

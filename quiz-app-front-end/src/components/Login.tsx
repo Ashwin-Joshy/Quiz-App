@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import QuizDialog from "../utils/QuizDialog";
 import { AuthContext } from "../context/AuthContext";
+import { prefix } from "../enums/prefix";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -19,7 +20,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const url = isSignUp ? "http://localhost:3000/user/create-user" : "http://localhost:3000/user/login-user";
+      const url = isSignUp ? `${prefix}/user/create-user` : `${prefix}/user/login-user`;
       const payload = isSignUp ? { email, password, name, phone, image } : { email, password };
       const response = await axios.post(url, payload);
       console.log(isSignUp ? "Signup Success:" : "Login Success:", response.data);

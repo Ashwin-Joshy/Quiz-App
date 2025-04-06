@@ -1,8 +1,9 @@
 import axios from "axios";
+import { prefix } from "../enums/prefix";
 
 // Create an Axios instance
 const api = axios.create({
-  baseURL: "http://localhost:3000", 
+  baseURL: prefix || "http://localhost:3000", 
 });
 
 // Request Interceptor to add JWT token to headers

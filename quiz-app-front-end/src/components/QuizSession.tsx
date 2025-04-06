@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { FaTimesCircle } from "react-icons/fa";
 import api from "../utils/axiosInstance";
 import QuizDialog from "../utils/QuizDialog";
+import { prefix } from "../enums/prefix";
 
 interface Question {
   _id: string;
@@ -36,7 +37,7 @@ const QuizSession = () => {
     });
 
     api
-      .get<Question[]>(`http://localhost:3000/quiz/questions-by-quiz/${quizId}`,
+      .get<Question[]>(`${prefix}/quiz/questions-by-quiz/${quizId}`,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
@@ -101,7 +102,7 @@ const QuizSession = () => {
     };
 
     try {
-      const response= await api.post("http://localhost:3000/quiz/submit-quiz", payload);
+      const response= await api.post(`${prefix}/quiz/submit-quiz`, payload);
       console.log("Quiz submitted successfully:", response.data);
       setIsModalOpen(true);
       setQuizResult(response.data);
