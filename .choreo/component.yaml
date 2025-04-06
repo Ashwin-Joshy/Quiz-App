@@ -1,0 +1,25 @@
+name: quiz-app-backend
+project: quiz-app
+componentType: service
+source:
+  type: git
+  repository: https://github.com/Ashwin-Joshy/Quiz-App
+  branch: master
+  context: quiz-app-back-end
+build:
+  env:
+    - name: NODE_ENV
+      value: production
+    - name: PORT
+      value: "3000"
+  commands:
+    - npm install
+    - npm run build
+    - npm run start:prod
+expose:
+  ingress:
+    type: public
+    context: /
+    port: 3000
+    host: quiz-api.choreo.dev
+    tls: true
