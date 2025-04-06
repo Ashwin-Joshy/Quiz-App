@@ -1,51 +1,70 @@
 import axios from "axios";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface User {
-  photo: string;
+  image: string;
   name: string;
   email: string;
   password: string;
   phone: string;
 }
 
-interface QuizAttempt {
-  id: string;
-  name: string;
-  grade: string;
-}
-
 const Profile = () => {
   const [user, setUser] = useState<User>({
-    photo: "https://via.placeholder.com/100",
+    image: "https://via.placeholder.com/100",
     name: "John Doe",
     email: "johndoe@example.com",
     password: "password123",
-    phone: "123-456-7890",
+    phone: "123-456-7890"
   });
   ;
   const [prevResults, setPrevResults] = useState<any[]>([]);
   const navigate = useNavigate();
   const [editing, setEditing] = useState(false);
 
-  useEffect(() => {
-    const email = localStorage.getItem("email");
-    if (email) {
-      //call axios get get-all-results
-      const prevviousResults = axios.get(`http://localhost:3000/quiz/get-all-results`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        }
-      )
-        .then((response) => {
-          console.log("Previous Results:", response.data);
-          setPrevResults(response.data);
-        })
-        .catch(() => {
-          alert("Failed to load previous results");
-        });
+  const saveOrEditProfile = (editStatus:boolean) => {
+    setEditing(editStatus);
+    if (!editStatus) {
+      const token = localStorage.getItem("token");
+    axios.put<User>(`http://localhost:3000/user/update-profile`, user,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+      .then(() => {
+        alert("Profile updated successfully");
+        setEditing(false);
+      })
+      .catch(() => {
+        alert("Failed to update profile");
+      });
     }
+  }
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    axios.get<User>(`http://localhost:3000/user/profile`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+      .then((response) => {
+        setUser(response.data);
+      })
+      .catch(() => {
+        alert("Failed to load user details");
+      });
+    axios.get(`http://localhost:3000/quiz/get-all-results`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    )
+      .then((response) => {
+        setPrevResults(response.data);
+      })
+      .catch(() => {
+        alert("Failed to load previous results");
+      });
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,7 +81,7 @@ const Profile = () => {
       {/* User Details Section */}
       <div className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex items-center gap-4">
-          <img src={user.photo} alt="Profile" className="w-20 h-20 rounded-full border" />
+          <img src={user.image} alt="Profile" className="w-20 h-20 rounded-full border" />
           <div>
             {editing ? (
               <input
@@ -84,7 +103,7 @@ const Profile = () => {
             value={user.email}
             onChange={handleChange}
             className="border p-2 rounded w-full"
-            disabled={!editing}
+            disabled={true}
           />
           <input
             type="password"
@@ -103,7 +122,7 @@ const Profile = () => {
             disabled={!editing}
           />
           <button
-            onClick={() => setEditing(!editing)}
+            onClick={() => saveOrEditProfile(!editing)}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
             {editing ? "Save" : "Edit Profile"}

@@ -23,9 +23,6 @@ export class User extends Document {
 
   @Prop({ required: true })
   updatedDate: Date;
-
-  @Prop([{ quizId: String, questionId: String, resultId: String }])
-  quizzesAttended: { quizId: string; questionId: string; resultId: string }[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

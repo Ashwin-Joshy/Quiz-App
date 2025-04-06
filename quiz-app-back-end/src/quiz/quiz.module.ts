@@ -3,7 +3,6 @@ import { QuizController } from './quiz.controller';
 import { QuizService } from './quiz.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Quiz, QuizSchema } from './schemas/quiz.schema';
-import { Answer, AnswerSchema } from './schemas/answer.schema';
 import { Question, QuestionSchema } from './schemas/question.schema';
 import { Result, ResultSchema } from './schemas/result.schema';
 
@@ -11,8 +10,7 @@ import { Result, ResultSchema } from './schemas/result.schema';
   imports: [MongooseModule.forFeature([
     { name: Quiz.name, schema: QuizSchema },
     { name: Question.name, schema: QuestionSchema },
-    { name: Answer.name, schema: AnswerSchema },
-    { name: Result.name, schema: ResultSchema },
+    { name: Result.name, schema: ResultSchema }
   ])],
   controllers: [QuizController],
   providers: [QuizService]

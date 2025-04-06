@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Question } from './schemas/question.schema';
 import { Model } from 'mongoose';
 import { Quiz } from './schemas/quiz.schema';
-import { Answer } from './schemas/answer.schema';
 import { Result } from './schemas/result.schema';
 
 @Injectable()
@@ -79,7 +78,6 @@ export class QuizService {
     constructor(
         @InjectModel(Question.name) private questionModel: Model<Question>,
         @InjectModel(Quiz.name) private quizModel: Model<Quiz>,
-        @InjectModel(Answer.name) private answerModel: Model<Answer>,
         @InjectModel(Result.name) private resultModel: Model<Result>,
     ) { }
 
@@ -189,7 +187,6 @@ export class QuizService {
     async deleteAll() {
         await this.quizModel.deleteMany({});
         await this.questionModel.deleteMany({});
-        await this.answerModel.deleteMany({});
         await this.resultModel.deleteMany({});
         return "All quizzes, questions, answers and results deleted successfully!";
     }
